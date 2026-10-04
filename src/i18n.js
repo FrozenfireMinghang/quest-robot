@@ -24,7 +24,7 @@ export const words = {
 };
 export function dictionary(lang) { return words[lang]||words.en; }
 export function language(locale) { return locale?.startsWith('zh')?'zh':'en'; }
-export const mention = id => `<@${id}>`;
+export const mention = id => id?.startsWith("sim-") ? `🤖 Player ${id.slice(4)} / 虚拟玩家 ${id.slice(4)}` : `<@${id}>`;
 export function status(g) {
   const w=dictionary(g.language), lines=[`**${w.title}** — ${w[g.phase]}`,`${w.players}: ${g.players.map(mention).join(' ')} (${g.players.length}/${g.size})`];
   if(g.roles) {

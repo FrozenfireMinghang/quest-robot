@@ -1,5 +1,6 @@
 import { MessageFlags, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle, StringSelectMenuBuilder } from 'discord.js';
 import * as E from './engine.js';
+import { createSimulation, simulationPanel, simulationStep } from './simulation.js';
 import { dictionary, language, mention, status } from './i18n.js';
 
 export function createHandler(client, store) {
@@ -35,7 +36,16 @@ return async function handleInteraction(i) {
     const key=`${i.guildId}:${i.channelId}`, id=i.user.id; let g=store.get(key); lang=g?.language||lang;
     let content=dictionary(lang).saved, components=[], announce=false;
     if(!i.isChatInputCommand()) {
-      g=requireGame(key); const [prefix,gameId,round,action]=i.customId.split(':');
+      g=requireGame(key);
+      if(i.customId.startsWith('sim:')) {
+        const [,gameId,revision,action]=i.customId.split(':');
+        if(gameId!==g.id||Number(revision)!==g.revision) throw new E.GameError('stale');
+        store.update(key,d=>simulationStep(d,id,action,i.values||[]));
+        await i.editReply(simulationPanel(store.get(key),id));
+        if(g.phase!==store.get(key).phase) await i.channel.send({content:(g.language==='zh'?'🧪 单人模拟测试\n':'🧪 Solo simulation\n')+status(store.get(key)),allowedMentions:{parse:[]}});
+        return;
+      }
+      const [prefix,gameId,round,action]=i.customId.split(':');
       if(prefix!=='q'||gameId!==g.id||Number(round)!==g.round) throw new E.GameError('stale');
       if(action==='accuse') { store.update(key,d=>E.accuse(d,id,i.values)); announce=true; }
       else if(['success','fail'].includes(action)) {
@@ -45,6 +55,16 @@ return async function handleInteraction(i) {
       const sub=i.options.getSubcommand(), opt=i.options;
       if(sub==='rules') { const w=dictionary(opt.getString('language')||lang); await i.editReply({content:`**${w.rulesTitle}**\n${w.rules}`}); return; }
       if(i.user.bot) throw new E.GameError('bot');
+      if(sub==='simulate') {
+        const replaceOwnEmptyLobby=g?.phase==='lobby'&&g.host===id&&g.players.length===1;
+        if(active(g)&&!replaceOwnEmptyLobby) throw new E.GameError('exists');
+        lang=opt.getString('language')||language(i.locale);
+        store.update(key,()=>({game:createSimulation(id,opt.getInteger('players')||4,lang)}));
+        await i.editReply(simulationPanel(store.get(key),id));
+        await i.channel.send({content:(lang==='zh'?'🧪 单人模拟测试\n':'🧪 Solo simulation\n')+status(store.get(key)),allowedMentions:{parse:[]}});
+        return;
+      }
+      if(sub==='simulate-panel') { await i.editReply(simulationPanel(requireGame(key),id));return; }
       if(sub==='create') {
         if(active(g)) throw new E.GameError('exists');
         lang=opt.getString('language')||language(i.locale);

@@ -1,6 +1,6 @@
 {
   "name": "quest-robot", "version": "1.0.0", "private": true, "type": "module",
   "engines": { "node": ">=22.12.0" },
-  "scripts": { "start": "node --env-file=.env src/bot.js", "register": "node --env-file=.env src/register.js", "test": "node --test", "check": "node --check src/bot.js && node --check src/engine.js && node --check src/interactions.js && node --check src/commands.js && node --check src/i18n.js && node --check src/store.js && node --check src/register.js" },
+  "scripts": { "start": "node --env-file=.env src/bot.js", "register": "node --env-file=.env src/register.js", "test": "node --test", "check": "node --check src/bot.js && node --check src/engine.js && node --check src/interactions.js && node --check src/commands.js && node --check src/i18n.js && node --check src/store.js && node --check src/register.js && node --check src/simulation.js" },
   "dependencies": { "discord.js": "^14.27.0" }
 }

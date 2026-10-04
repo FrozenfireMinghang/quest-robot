@@ -20,4 +20,8 @@ sub('final','Open accusations after five minutes of discussion','五分钟讨论
 sub('language','Host: switch the public game language','房主：切换公开游戏语言',b=>b.addStringOption(o=>local(o.setName('value'),'Game language','游戏语言').setRequired(true).addChoices({name:'English',value:'en'},{name:'简体中文',value:'zh'})));
 sub('cancel','Host or administrator: cancel this game','房主或管理员：取消游戏');
 sub('rules','Read the standard rules','查看普通版规则',b=>b.addStringOption(o=>local(o.setName('language'),'Rules language','规则语言').addChoices({name:'English',value:'en'},{name:'简体中文',value:'zh'})));
+sub('simulate','Start a local solo simulation with virtual players','开始单人模拟局，自动加入虚拟玩家',b=>b
+  .addIntegerOption(o=>local(o.setName('players'),'Simulated player count','模拟人数').addChoices({name:'4',value:4},{name:'5',value:5},{name:'6',value:6}))
+  .addStringOption(o=>local(o.setName('language'),'Simulation language','模拟语言').addChoices({name:'English',value:'en'},{name:'简体中文',value:'zh'})));
+sub('simulate-panel','Host: reopen the private simulation controls','房主：重新打开私密模拟面板');
 export const commands=[command.toJSON()];

@@ -37,6 +37,7 @@ Use slash commands to create a lobby, form teams and hand over leadership. Priva
 | English + Chinese | Localized command descriptions, gameplay prompts, errors and rules; language switching |
 | Saved games | Atomic local JSON saves and recovery after process restart |
 | Multiple games | Separate state per server/channel |
+| Solo simulation | Choose teams and Magic, then submit each virtual player’s card through private controls |
 
 ### Engineering decisions
 
@@ -90,9 +91,18 @@ Then create a game in Discord:
 
 See [SETUP.md](SETUP.md) for bot invitations, required permissions, all commands and the standard rules.
 
+### Try it solo
+
+```text
+/quest simulate players:4 language:en
+/quest simulate-panel
+```
+
+Choose the team, assign Magic to a team member, then submit Success or Fail separately for each player. The panel disables illegal Fail choices and resolves the quest after everyone submits. Click **Assign next leader** to start the next round. The host can see all simulated roles and skip discussion time in simulations. See [SIMULATION.md](SIMULATION.md).
+
 ### Validation and current scope
 
-The initial version passes **22 automated tests** covering rule transitions, complete games, information privacy, persistence, authorization, localization and mocked Discord interactions. Run `npm test` and `npm run check` to verify it locally.
+The current version passes **28 automated tests** covering rule transitions, complete games, information privacy, persistence, authorization, localization and mocked Discord interactions. Run `npm test` and `npm run check` to verify it locally.
 
 Live-server validation requires your own Discord credentials. This version uses existing text channels, one local writer process and human players. It does not include AI opponents, optional characters or Director’s Cut rules. The five-minute deadline is checked when a player uses `/quest final`; the bot does not mute people or auto-submit missing choices.
 
@@ -116,6 +126,7 @@ Quest Robot 是我的个人 Discord 游戏机器人项目，为 **Quest 普通�
 | 中英文支持 | 命令说明、游戏提示、错误和规则均支持中英文，房主可切换语言 |
 | 游戏存档 | 本地 JSON 原子写入，进程重启后恢复游戏 |
 | 多局隔离 | 按服务器与频道保存独立状态 |
+| 单人模拟 | 私密菜单选队员、分配魔法，并逐个代虚拟玩家出牌 |
 
 ### 工程设计
 
@@ -126,6 +137,15 @@ Quest Robot 是我的个人 Discord 游戏机器人项目，为 **Quest 普通�
 **先保存，再确认操作。** 修改在状态副本上执行，通过临时文件与重命名写入存档，避免无效操作留下部分修改。任务结算后只保留失败数量等汇总记录。
 
 **防止重复提交与旧面板误操作。** 按钮包含游戏 ID 和轮次，规则引擎同时检查阶段、玩家资格和重复提交。上一局留下的面板不能影响新的一局。
+
+### 一个人测试完整对局
+
+```text
+/quest simulate players:4 language:zh
+/quest simulate-panel
+```
+
+通过私密面板依次选择队员、分配魔法，再逐个代玩家点击成功或失败。不能失败时按钮变灰；全部出牌后统一结算。点击 **交接下一任领袖** 进入下一轮。模拟局允许房主查看全部角色，并跳过讨论计时。完整说明见 [SIMULATION.md](SIMULATION.md)。
 
 ### 启动与验证
 
@@ -138,7 +158,7 @@ Quest Robot 是我的个人 Discord 游戏机器人项目，为 **Quest 普通�
 /quest role
 ```
 
-完整邀请方法、权限、操作命令与规则见 [SETUP.md](SETUP.md)。初版已通过 **22 项自动化测试**，覆盖完整对局、规则边界、秘密信息、存档、权限、中英文与模拟 Discord 交互。执行 `npm test` 和 `npm run check` 可本地验证。
+完整邀请方法、权限、操作命令与规则见 [SETUP.md](SETUP.md)。当前版本已通过 **28 项自动化测试**，覆盖完整对局、规则边界、秘密信息、存档、权限、中英文与模拟 Discord 交互。执行 `npm test` 和 `npm run check` 可本地验证。
 
 真实服务器联调仍需自己的 Discord 凭据。本版使用现有文字频道、本地单进程存档和真人玩家，不包含 AI 玩家、可选角色或导演剪辑版。最终讨论到时后，由玩家执行 `/quest final` 开启指认；机器人不会自动禁言或替缺席玩家提交。
 
@@ -151,11 +171,13 @@ src/
   i18n.js          English and Chinese messages / 中英文消息
   store.js         Atomic persistence / 原子存档
   commands.js      Slash command definitions / 斜杠命令定义
+  simulation.js    Host-controlled solo simulation / 房主控制的单人模拟
   register.js      Server command registration / 服务器命令注册
   bot.js           Gateway connection / Discord 连接入口
 test/
   engine.test.js       Rules, complete games and persistence / 规则、完整对局与存档
   interactions.test.js Interaction privacy and authorization / 交互隐私与权限
+  simulation.test.js   Solo games, Magic and separate cards / 单人对局、魔法与逐个出牌
 ```
 
 ## Inspiration & acknowledgements / 灵感与致谢

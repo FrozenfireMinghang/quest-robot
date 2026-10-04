@@ -43,6 +43,8 @@ Use one dedicated server text channel per game. Concurrent games in different ch
 | Command | English | 中文 |
 | --- | --- | --- |
 | `/quest create players:4 language:zh board:a` | Create lobby, host automatically joins | 创建房间，房主自动加入；人数可选 4/5/6 |
+| `/quest simulate players:4 language:zh` | Start a host-controlled solo simulation | 开始单人模拟，按菜单选队伍、魔法和逐个出牌 |
+| `/quest simulate-panel` | Reopen private simulation controls | 重新打开单人模拟面板 |
 | `/quest join` / `/quest leave` | Join or leave before start | 开始前加入或退出 |
 | `/quest start` | Host starts a full lobby | 人数齐后房主开局 |
 | `/quest role` | View your private role and known allies | 秘密查看身份、已知坏人、护符结果 |
@@ -93,3 +95,5 @@ npm run check
 Tests cover rules, privacy, persistence and Discord interaction handling with local mocks. Live Discord connectivity requires your own credentials and is a separate validation step.
 
 Source layout: `src/engine.js` rules; `src/interactions.js` Discord adapter; `src/i18n.js` English/Chinese; `src/store.js` save storage; `src/commands.js` command definitions.
+
+For solo testing / 单人测试: see [SIMULATION.md](SIMULATION.md). After installing an updated version, run `npm run register` again to register the simulation commands. / 更新旧版后，重新执行 `npm run register` 注册模拟命令。
